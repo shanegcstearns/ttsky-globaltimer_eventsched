@@ -1,3 +1,9 @@
+// tt_um_globaltimer_sched
+// Lightweight event scheduling system built around epoch-based global timer.
+// A programmable 4-event scheduler enables hardware blocks during specific time
+// windows defined in epoch units. The design includes a power-of-two window
+// generator for periodic processing and a small serial debug interface that
+// streams internal state. Optimized for TinyTapeout with low cell count.
 
 module tt_um_globaltimer_sched (
     input wire [7:0] ui_in,
