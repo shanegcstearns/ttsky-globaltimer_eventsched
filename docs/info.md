@@ -28,7 +28,3 @@ No external hardware required or used
 
 ## GenAI Tools
 Generative AI was used to create all modules except the basic epoch based global timer
-
-
-```sh
-make -B
