@@ -11,6 +11,23 @@ def u(sig) -> int:
     return int(sig.value)
 
 
+def bit(sig, idx: int) -> int:
+    v = sig.value[idx]
+    s = str(v)
+    if s == "1":
+        return 1
+    return 0
+
+
+def bits2(sig, msb: int, lsb: int) -> int:
+    val = 0
+    shift = 0
+    for i in range(lsb, msb + 1):
+        val |= (bit(sig, i) << shift)
+        shift += 1
+    return val
+
+
 async def start_clock(clk, period_ns=10):
     cocotb.start_soon(Clock(clk, period_ns, unit="ns").start())
     await Timer(period_ns * 2, unit="ns")
@@ -35,6 +52,7 @@ async def top_write(dut, night_en: int, event_sel: int, reg_sel: int, data: int)
     ui = ((night_en & 1) << 7) | (1 << 6) | ((event_sel & 3) << 4) | ((reg_sel & 3) << 2)
     dut.ui_in.value = ui
     await RisingEdge(dut.clk)
+
     ui = ((night_en & 1) << 7) | ((event_sel & 3) << 4) | ((reg_sel & 3) << 2)
     dut.ui_in.value = ui
     await RisingEdge(dut.clk)
@@ -70,27 +88,27 @@ def looks_like_top(dut) -> bool:
 
 
 def top_event_active(dut) -> int:
-    return (u(dut.uo_out) >> 1) & 0x1
+    return bit(dut.uo_out, 1)
 
 
 def top_event_id(dut) -> int:
-    return (u(dut.uo_out) >> 2) & 0x3
+    return bits2(dut.uo_out, 3, 2)
 
 
 def top_window_start(dut) -> int:
-    return (u(dut.uo_out) >> 4) & 0x1
+    return bit(dut.uo_out, 4)
 
 
 def top_window_end(dut) -> int:
-    return (u(dut.uo_out) >> 5) & 0x1
+    return bit(dut.uo_out, 5)
 
 
 def top_epoch_tick(dut) -> int:
-    return (u(dut.uo_out) >> 6) & 0x1
+    return bit(dut.uo_out, 6)
 
 
 def top_epoch_end(dut) -> int:
-    return (u(dut.uo_out) >> 7) & 0x1
+    return bit(dut.uo_out, 7)
 
 
 async def wait_top_epoch_tick(dut, timeout_cycles=200_000):
@@ -247,13 +265,18 @@ async def test_top_level_programming_scheduler(dut):
 
     await reset_top(dut, 3)
 
+    # Program event 1: start=5, dur=3, enable=1
     await top_write(dut, night_en=0, event_sel=1, reg_sel=0b00, data=5)
     await top_write(dut, night_en=0, event_sel=1, reg_sel=0b01, data=0)
     await top_write(dut, night_en=0, event_sel=1, reg_sel=0b10, data=3)
     await top_write(dut, night_en=0, event_sel=1, reg_sel=0b11, data=0b00000100)
 
+    # Start night mode
     dut.ui_in.value = (1 << 7)
     await RisingEdge(dut.clk)
+
+    # Give outputs a little time to settle in GL sim
+    await Timer(20, unit="ns")
 
     for epoch in range(1, 13):
         await wait_top_epoch_tick(dut)
@@ -268,5 +291,5 @@ async def test_top_level_programming_scheduler(dut):
         else:
             assert active == 0, f"Expected no event active at top-level epoch {epoch}"
 
-    assert u(dut.uio_out) == 0
-    assert u(dut.uio_oe) == 0
+    assert bit(dut.uio_out, 0) == 0
+    assert bit(dut.uio_oe, 0) == 0
