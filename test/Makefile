@@ -3,7 +3,7 @@ FST ?= -fst
 TOPLEVEL_LANG ?= verilog
 
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES ?= tt_um_globaltimer_sched.sv
+PROJECT_SOURCES ?= tt_um_globaltimer_sched.v
 
 ifneq ($(GATES),yes)
 SIM_BUILD = sim_build/rtl
