@@ -1,26 +1,21 @@
 module tt_um_globaltimer_sched (
-    ui_in,
-    uo_out,
-    uio_in,
-    uio_out,
-    uio_oe,
-    ena,
-    clk,
-    rst_n
+    input  wire [7:0] ui_in,
+    output wire [7:0] uo_out,
+    input  wire [7:0] uio_in,
+    output wire [7:0] uio_out,
+    output wire [7:0] uio_oe,
+    input  wire       ena,
+    input  wire       clk,
+    input  wire       rst_n
+`ifdef USE_POWER_PINS
+    ,input wire VPWR
+    ,input wire VGND
+`endif
 );
 
-    input  wire [7:0] ui_in;
-    output wire [7:0] uo_out;
-    input  wire [7:0] uio_in;
-    output wire [7:0] uio_out;
-    output wire [7:0] uio_oe;
-    input  wire       ena;
-    input  wire       clk;
-    input  wire       rst_n;
-
     // ui_in[7] = enable
-    // uo_out[0] = epoch tick pulse
-    // uo_out[1] = epoch end pulse
+    // uo_out[0] = epoch_tick
+    // uo_out[1] = epoch_end
     // uo_out[7:2] = epoch_index[5:0]
     // uio_out[3:0] = epoch_index[9:6]
 
