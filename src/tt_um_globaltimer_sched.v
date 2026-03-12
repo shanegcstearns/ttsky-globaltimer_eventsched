@@ -18,16 +18,15 @@ module tt_um_globaltimer_sched (
     input  wire       clk;
     input  wire       rst_n;
 
-    // Simple global epoch timer only
     // ui_in[7] = enable
     // uo_out[0] = epoch tick pulse
     // uo_out[1] = epoch end pulse
     // uo_out[7:2] = epoch_index[5:0]
     // uio_out[3:0] = epoch_index[9:6]
 
-    localparam integer CLK_SPEED_HZ    = 10000000;
-    localparam integer EPOCH_HZ        = 100;
-    localparam integer EPOCH_COUNT_MAX = 1000;
+    localparam integer CLK_SPEED_HZ     = 10000000;
+    localparam integer EPOCH_HZ         = 100;
+    localparam integer EPOCH_COUNT_MAX  = 1000;
     localparam integer CYCLES_PER_EPOCH = CLK_SPEED_HZ / EPOCH_HZ;
 
     function integer clog2;
@@ -73,14 +72,14 @@ module tt_um_globaltimer_sched (
                         epoch_index_q <= epoch_index_q + 10'd1;
                     end
                 end else begin
-                    div_q <= div_q + {{(DIV_W-1){1'b0}}, 1'b1};
+                    div_q <= div_q + 1'b1;
                 end
             end
         end
     end
 
-    assign uo_out[0] = epoch_tick_q;
-    assign uo_out[1] = epoch_end_q;
+    assign uo_out[0]   = epoch_tick_q;
+    assign uo_out[1]   = epoch_end_q;
     assign uo_out[7:2] = epoch_index_q[5:0];
 
     assign uio_out[3:0] = epoch_index_q[9:6];
